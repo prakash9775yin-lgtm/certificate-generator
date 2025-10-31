@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Participation Certificate Generator</title>
+  <style>
+    body{font-family:Segoe UI, Roboto, Arial;background:#f3f4f6;padding:20px}
+    .app{max-width:980px;margin:0 auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.06)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input,select,textarea,button{padding:8px;border:1px solid #d1d5db;border-radius:6px}
+    .controls{margin-bottom:18px}
+    .preview-wrap{display:flex;gap:16px;align-items:flex-start}
+    .certificate{width:794px;height:562px;padding:36px;box-sizing:border-box;border:8px solid #0f172a;background:linear-gradient(180deg,#ffffff,#f8fafc);position:relative}
+    .cert-title{text-align:center;font-size:24px;font-weight:700;margin-top:6px}
+    .cert-body{text-align:center;margin-top:18px}
+    .recipient{font-size:28px;font-weight:700;margin-top:12px}
+    .meta{margin-top:14px;font-size:14px}
+    .footer{position:absolute;bottom:28px;left:36px;right:36px;display:flex;justify-content:space-between;align-items:center}
+    .sig img{height:56px}
+    .small{font-size:12px;color:#374151}
+    .btn{background:#0b84ff;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+    .btn:disabled{opacity:0.5}
+    .help{font-size:13px;color:#374151}
+    textarea{min-height:60px}
+    .file-input{display:flex;gap:8px;align-items:center}
+    .note{font-size:13px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2>Participation Certificate Generator</h2>
+    <p class="help">हा एक single-file webpage आहे — फाईल डाउनलोड करून ब्राउजरमध्ये उघडल्यावर लगेच वापरता येईल. (No server required for simple exports.)</p>
+
+    <div class="controls">
+      <div class="row">
+        <div style="flex:1;min-width:260px">
+          <label>Event/Program Name</label>
+          <input id="eventName" value="प्रवेशिका इव्हेंट" />
+        </div>
+        <div style="width:200px;min-width:160px">
+          <label>Certificate Title</label>
+          <input id="certTitle" value="Participation Certificate" />
+        </div>
+        <div style="width:160px;min-width:120px">
+          <label>Date (display)</label>
+          <input id="dateText" value="31 October 2025" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div style="flex:1">
+          <label>Certificate Message (above name)</label>
+          <textarea id="message">हा सन्मान आम्ही आपल्या सहभागासाठी देत आहोत.</textarea>
+        </div>
+        <div style="width:220px">
+          <label>Signature Image (optional)</label>
+          <div class="file-input">
+            <input type="file" id="sigFile" accept="image/*" />
+          </div>
+          <p class="note">Transparent PNG recommended.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="row">
+        <div style="flex:1;min-width:260px">
+          <label>Enter one name (quick single certificate)</label>
+          <input id="singleName" placeholder="Full name" />
+        </div>
+        <div style="width:240px;display:flex;flex-direction:column;gap:8px;justify-content:flex-end">
+          <button id="previewBtn" class="btn">Preview</button>
+          <button id="downloadSingle" class="btn">Download single PDF</button>
+        </div>
+      </div>
+
+      <hr style="margin:16px 0" />
+
+      <div class="row">
+        <div style="flex:1;min-width:260px">
+          <label>Or upload CSV for bulk (one column: name)</label>
+          <input type="file" id="csvFile" accept="text/csv" />
+          <p class="note">CSV first column should contain participant names. Example: <code>name</code></p>
+        </div>
+        <div style="width:240px;display:flex;flex-direction:column;gap:8px;justify-content:flex-end">
+          <button id="generateAll" class="btn">Generate all PDFs and download ZIP</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="preview-wrap">
+      <div>
+        <label>Live Preview</label>
+        <div id="certificate" class="certificate">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700">Organization Name</div>
+            <div style="font-size:12px" id="previewDate">31 October 2025</div>
+          </div>
+
+          <div class="cert-title" id="previewEvent">Event / Program</div>
+          <div class="cert-body">
+            <div id="previewCertTitle" style="font-size:20px;font-weight:700">Participation Certificate</div>
+            <div class="meta" id="previewMessage">हा सन्मान आम्ही आपल्या सहभागासाठी देत आहोत.</div>
+            <div class="recipient" id="previewName">Participant Name</div>
+            <div class="meta small" id="previewMeta">for active participation in the event</div>
+          </div>
+
+          <div class="footer">
+            <div class="small">Generated by: Your Media Team</div>
+            <div class="sig" id="sigPreview"></div>
+          </div>
+        </div>
+        <p class="note">Certificate size ~ A4 landscape (794×562 preview).</p>
+      </div>
+    </div>
+
+    <hr style="margin:18px 0" />
+    <div class="help">Usage quick steps:
+      <ol>
+        <li>Customize title, message, date and signature.</li>
+        <li>Either enter a single name and click "Download single PDF", or upload a CSV and click "Generate all PDFs and download ZIP".</li>
+        <li>Open the downloaded PDF(s) and print or email as needed.</li>
+      </ol>
+    </div>
+
+    <p style="margin-top:14px" class="help">Need hosting or auto-emailing certificates? I can provide a small Node.js script and deployment steps (optional).</p>
+  </div>
+
+  <!-- Libraries from CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+    const previewName = document.getElementById('previewName');
+    const previewEvent = document.getElementById('previewEvent');
+    const previewCertTitle = document.getElementById('previewCertTitle');
+    const previewMessage = document.getElementById('previewMessage');
+    const previewDate = document.getElementById('previewDate');
+    const sigPreview = document.getElementById('sigPreview');
+
+    document.getElementById('eventName').addEventListener('input', e=> previewEvent.textContent = e.target.value || 'Event / Program');
+    document.getElementById('certTitle').addEventListener('input', e=> previewCertTitle.textContent = e.target.value || 'Participation Certificate');
+    document.getElementById('message').addEventListener('input', e=> previewMessage.textContent = e.target.value || 'Message');
+    document.getElementById('dateText').addEventListener('input', e=> previewDate.textContent = e.target.value || 'Date');
+
+    document.getElementById('sigFile').addEventListener('change', async (e)=>{
+      const f = e.target.files[0];
+      if(!f) return; 
+      const url = URL.createObjectURL(f);
+      sigPreview.innerHTML = '<img src="'+url+'" alt="sig" />';
+    });
+
+    document.getElementById('previewBtn').addEventListener('click', ()=>{
+      const n = document.getElementById('singleName').value.trim() || 'Participant Name';
+      previewName.textContent = n;
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    async function renderCertificateToPdf(name){
+      // set name in preview
+      previewName.textContent = name;
+      // small delay for image render
+      await new Promise(r=>setTimeout(r,120));
+      const el = document.getElementById('certificate');
+      const canvas = await html2canvas(el, {scale:2});
+      const imgData = canvas.toDataURL('image/png');
+      // create pdf A4 landscape
+      const pdf = new jsPDF({orientation:'landscape', unit:'pt', format:[842,595]});
+      pdf.addImage(imgData,'PNG',0,0,842,595);
+      return pdf;
+    }
+
+    document.getElementById('downloadSingle').addEventListener('click', async ()=>{
+      const name = document.getElementById('singleName').value.trim();
+      if(!name){alert('कृपया नाव टाका.'); return}
+      const pdf = await renderCertificateToPdf(name);
+      const safeName = name.replace(/[^a-z0-9\-_]/gi,'_');
+      pdf.save(safeName+'_certificate.pdf');
+    });
+
+    document.getElementById('generateAll').addEventListener('click', async ()=>{
+      const file = document.getElementById('csvFile').files[0];
+      if(!file){alert('कृपया CSV फाईल अपलोड करा.'); return}
+      const text = await file.text();
+      const parsed = Papa.parse(text, {header:true, skipEmptyLines:true});
+      const names = [];
+      if(parsed.meta.fields && parsed.meta.fields.length>0){
+        // if header present and first field likely name
+        const key = parsed.meta.fields[0];
+        for(const r of parsed.data){ if(r[key] && r[key].trim()) names.push(r[key].trim()); }
+      } else {
+        for(const r of parsed.data){ if(r[0] && r[0].trim()) names.push(r[0].trim()); }
+      }
+      if(names.length===0){alert('CSV मध्ये नावं सापडली नाहीत. कृपया पहिली column मध्ये नावं ठेवा.'); return}
+
+      document.getElementById('generateAll').disabled = true; document.getElementById('generateAll').textContent='Generating...';
+      const zip = new JSZip();
+      for(let i=0;i<names.length;i++){
+        const name = names[i];
+        try{
+          const pdf = await renderCertificateToPdf(name);
+          const blob = pdf.output('blob');
+          const safe = name.replace(/[^a-z0-9\-_]/gi,'_') || ('participant_'+(i+1));
+          zip.file(safe+'_certificate.pdf', blob);
+        } catch(e){ console.error('error for',name,e); }
+      }
+      const content = await zip.generateAsync({type:'blob'});
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a'); a.href=url; a.download='certificates.zip'; document.body.appendChild(a); a.click(); a.remove();
+      document.getElementById('generateAll').disabled = false; document.getElementById('generateAll').textContent='Generate all PDFs and download ZIP';
+    });
+
+  </script>
+</body>
+</html>
